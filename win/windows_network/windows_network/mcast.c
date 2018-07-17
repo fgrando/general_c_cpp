@@ -14,6 +14,7 @@ int mcast_set_iface(SOCKET sock, char *ifaddr);
 int mcast_set_ttl(SOCKET sock, int ttl);
 int mcast_leave(SOCKET sock, char *grpaddr, char *ifaddr);
 int mcast_join(SOCKET sock, char *grpaddr, char *ifaddr);
+int mcast_set_loopback(SOCKET sock, int enabled);
 inline int mcast_config(SOCKET sock, char *group_addr, char *iface_addr, int opt);
 
 
@@ -75,7 +76,19 @@ int mcast_set_ttl(SOCKET sock, int ttl)
 
 	if (ret == SOCKET_ERROR)
 	{
-		PRINT_WSA_ERROR("failed to set ttl to %d", ttl);
+		PRINT_WSA_ERROR("failed to set mcast ttl option to %d", ttl);
+	}
+	return ret;
+}
+
+int mcast_set_loopback(SOCKET sock, int enabled)
+{
+	int ret = 0;
+	ret = setsockopt(sock, IPPROTO_IP, IP_MULTICAST_LOOP, (char *)&enabled, sizeof(enabled));
+
+	if (ret == SOCKET_ERROR)
+	{
+		PRINT_WSA_ERROR("failed to set mcast loopback option to %d", enabled);
 	}
 	return ret;
 }
