@@ -30,9 +30,18 @@
     <ClCompile Include="timestamp.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="bitfield.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="iface.c">
+      <Filter>Header Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="wsa_error.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="iface.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

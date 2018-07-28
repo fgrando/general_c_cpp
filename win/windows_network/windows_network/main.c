@@ -471,6 +471,7 @@ int main(int argc, char *argv[])
 		usage(argv[0]);
 		printf("\n\tinterfaces:\n");
 		print_interfaces_ipv4();
+		doit();
 
 		char *argss[7] = {
 			"windows_network.exe", "7", "239.0.0.4", "44444", "windows10", "11.11.11.13",

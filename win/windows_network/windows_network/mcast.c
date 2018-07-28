@@ -18,6 +18,7 @@ int mcast_set_loopback(SOCKET sock, int enabled);
 inline int mcast_config(SOCKET sock, char *group_addr, char *iface_addr, int opt);
 
 
+
 inline int mcast_config(SOCKET sock, char *group_addr, char *iface_addr, int opt)
 {
 	int ret = 0;
