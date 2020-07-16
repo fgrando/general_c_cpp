@@ -1,8 +1,9 @@
 #include <time.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
-int timestamp(char *out, int max, int full)
+int timestamp(char *buff, int len, int precise)
 {
 	int ret = 0;
 	time_t time_now = 0;
@@ -10,17 +11,17 @@ int timestamp(char *out, int max, int full)
 	
 	time(&time_now);
 	localtime_s(&timeinfo, &time_now);
-	memset(out, 0x0, max);
+    memset(buff, 0x0, len);
 
-	if (full)
+    if (precise)
 	{
-		ret = snprintf(out, max, "%04d-%02d-%02d.%02d:%02d:%02d",
+        ret = _snprintf_s(buff, len, "%04d-%02d-%02d.%02d:%02d:%02d",
 			(timeinfo.tm_year + 1900), (timeinfo.tm_mon + 1), timeinfo.tm_mday,
 			timeinfo.tm_hour, timeinfo.tm_min, timeinfo.tm_sec);
 	}
 	else
 	{
-		ret = snprintf(out, max, "%02d:%02d:%02d", 
+        ret = _snprintf_s(buff, len, "%02d:%02d:%02d",
 			timeinfo.tm_hour, timeinfo.tm_min, timeinfo.tm_sec);
 	}
 	return ret;

@@ -15,11 +15,11 @@ int mcast_set_ttl(SOCKET sock, int ttl);
 int mcast_leave(SOCKET sock, char *grpaddr, char *ifaddr);
 int mcast_join(SOCKET sock, char *grpaddr, char *ifaddr);
 int mcast_set_loopback(SOCKET sock, int enabled);
-inline int mcast_config(SOCKET sock, char *group_addr, char *iface_addr, int opt);
+int mcast_config(SOCKET sock, char *group_addr, char *iface_addr, int opt);
 
 
 
-inline int mcast_config(SOCKET sock, char *group_addr, char *iface_addr, int opt)
+int mcast_config(SOCKET sock, char *group_addr, char *iface_addr, int opt)
 {
 	int ret = 0;
 	if (IP_ADD_MEMBERSHIP == opt || IP_DROP_MEMBERSHIP == opt)

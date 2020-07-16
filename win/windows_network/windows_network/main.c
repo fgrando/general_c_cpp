@@ -1,10 +1,13 @@
+// sources: https://docs.microsoft.com/en-us/windows/win32/api/winsock/nf-winsock-recvfrom
 #define WIN32_LEAN_AND_MEAN
 
-#include <windows.h>
-#include <stdio.h>
 #include <winsock2.h>
-#include <ws2tcpip.h>
+#include <Ws2tcpip.h>
+#include <mstcpip.h>
+
+#include <stdio.h>
 #include <stdlib.h>
+
 
 #include <time.h>
 
@@ -27,9 +30,26 @@ extern int mcast_join(SOCKET sock, char *grpaddr, char *ifaddr);
 void usage(char *appname)
 {
 	printf("usage: \n");
+
 	printf("to send : %s 5 <target ip> <port> <message> [count] [multicast interface] \n", appname);
 	printf("to recv : %s 6 <port> [count] [multicast group] [multicast interface] \n", appname);
 	printf("pingpong: %s 7 <mcast ip> <port> <message> <multicast interface> \n", appname);
+    printf("ifaces  : %s 8\n", appname);
+    printf("sniffer : %s 9 <local interface ip>\n", appname);
+}
+
+int set_promiscuous_mode(SOCKET sock, int active)
+{
+    int result = 0;
+    DWORD dwValue = (active != 0) ? RCVALL_ON : RCVALL_OFF;
+
+    DWORD dwBytesReturned = 0;
+    if (WSAIoctl(sock, SIO_RCVALL, &dwValue, sizeof(dwValue), NULL, 0, &dwBytesReturned, NULL, NULL) == SOCKET_ERROR)
+    {
+        PRINT_WSA_ERROR("ioctl failed to set SIO_RCVALL");
+        result = -1;
+    }
+    return result;
 }
 
 int sock_set_nonblock(SOCKET sock, int nonblock)
@@ -76,7 +96,7 @@ void print_interfaces_ipv4()
 
 	total = ifaces_get(&list, max);
 	for (int i = 0; i < total; i++)
-		printf("%d %s\n", i, list[i]);
+        printf("#%d %s\n", i+1, list[i]);
 
 	ifaces_free(&list, total);
 }
@@ -306,7 +326,132 @@ void recv_packet(int argc, char *argv[])
 	closesocket(sock);
 }
 
+char translate(char c)
+{
+    char ch = '.';
+    if (c >= 0x20 && c <= 0x7E)
+        ch = c;
+    return ch;
+}
 
+void dump_packet(char* buf, int len)
+{
+    static const int bytes_row = 16;
+    int total = len;
+
+    if (total%bytes_row != 0)
+    {
+        // increment total
+        total += (bytes_row - total%bytes_row);
+    }
+
+    int line_len = (sizeof(char)* bytes_row) + 1;
+    char *line = malloc(line_len);
+    memset(line, 0x0, line_len);
+
+    for (int i = 0; i < total; i++)
+    {
+        if (i < len){
+            int value = (int)buf[i] & 0x000000ff;
+            printf("%02x ", value);
+            line[i%bytes_row] = translate(buf[i]);
+        }
+        else {
+            printf("   ");
+            line[i%bytes_row] = '\0';
+        }
+
+        if (((i+1) % bytes_row == 0) ||
+            ((i+1) == total) ) /* also print if is the last item */
+        {
+            printf("| %s\n", line);
+            memset(line, 0x0, line_len);
+        }
+    }
+}
+
+void recv_raw(int argc, char *argv[])
+{
+    printf("In order to know if your system supports RAW sockets, type 'netsh winsock show catalog' in command prompt and look for RAW/IP\n");
+    printf("The usage of SOCK_RAW requires administrative privileges: https://docs.microsoft.com/en-us/windows/win32/winsock/tcp-ip-raw-sockets-2)\n");
+    printf("This 'raw' socket will not capture other packets (ARP, IPX, and NetBEUI packets, for example) on the interface.\n");
+
+    // see examples at https://docs.microsoft.com/en-us/previous-versions/windows/desktop/legacy/ee309610(v=vs.85
+    SOCKET sock;
+    struct sockaddr_in ssource;
+    struct sockaddr_in slocal;
+    int ret = 0;
+    char final_ip[16] = { 0 };
+    char *interface_ip = NULL;
+    int slen = 0;
+    char buf[65535] = { 0 };
+
+
+    // parse inputs from user:
+    // format: argv[0] 9 ipv4"
+    if (argc < 3)
+    {
+        usage(argv[0]);
+        return;
+    }
+    interface_ip = argv[2]; // bind to this interface
+
+    // open the socket
+    sock = socket(AF_INET, SOCK_RAW, IPPROTO_IP); // SIO_RCVALL requires type IPPROTO_IP
+    if (sock == INVALID_SOCKET)
+    {
+        PRINT_WSA_ERROR("socket() failed");
+        exit(EXIT_FAILURE);
+    }
+
+    //Bind is required to set the interface to promiscuous mode
+    slocal.sin_family = AF_INET;
+    // slocal.sin_port = htons(port_int); //port is not relevant in raw socket
+    slocal.sin_addr.s_addr = inet_addr(interface_ip);// SIO_RCVALL requires INADDR_ANY not to be used
+
+    slen = sizeof(slocal);
+    ret = bind(sock, (struct sockaddr *)&slocal, slen);
+    if (ret == SOCKET_ERROR)
+    {
+        PRINT_WSA_ERROR("bind failed");
+        exit(EXIT_FAILURE);
+    }
+
+    set_promiscuous_mode(sock, 1);
+
+    //so far we will receive data starting from IPv4 length field
+    //(missing the first 14 bytes: 12 for mac + ip version)
+
+    // this setting is only useful when sending data (https://docs.microsoft.com/en-us/windows/win32/winsock/tcp-ip-raw-sockets-2)
+    //int optval=1;
+    //ret = setsockopt(sock, IPPROTO_IP, IP_HDRINCL, (char *)&optval, sizeof optval);
+    //if (ret == SOCKET_ERROR)
+    //{
+    //    PRINT_WSA_ERROR("failed to request IP header");
+    //}
+
+
+    while (1)
+    {
+        memset(buf, 0x0, sizeof(buf));
+        ret = recvfrom(sock, buf, sizeof(buf), 0, (struct sockaddr *) &ssource, &slen);
+
+        if (ret == SOCKET_ERROR)
+        {
+            PRINT_WSA_ERROR("recvfrom() failed ");
+            exit(EXIT_FAILURE);
+        }
+        else
+        {
+            inet_ntop(AF_INET, &ssource.sin_addr, final_ip, sizeof(final_ip));
+            printf("\nrecv %d bytes %s:%d\n", ret, final_ip, ntohs(ssource.sin_port));
+            
+            dump_packet(buf, ret);
+        }
+    }
+
+    closesocket(sock);
+}
 
 void pingpong(int argc, char *argv[])
 {
@@ -462,6 +607,12 @@ int main(int argc, char *argv[])
 		case 7:
 			pingpong(argc, argv);
 			break;
+        case 8:
+            print_interfaces_ipv4();
+            break;
+        case 9:
+            recv_raw(argc, argv);
+            break;
 		default:
 			break;
 		}
@@ -469,14 +620,7 @@ int main(int argc, char *argv[])
 	else
 	{
 		usage(argv[0]);
-		printf("\n\tinterfaces:\n");
-		print_interfaces_ipv4();
 		doit();
-
-		char *argss[7] = {
-			"windows_network.exe", "7", "239.0.0.4", "44444", "windows10", "11.11.11.13",
-			NULL };
-		pingpong(6, argss);
 	}
 
 	sock_finish();
