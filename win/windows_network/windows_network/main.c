@@ -25,6 +25,8 @@ extern int mcast_set_iface(SOCKET sock, char *ifaddr);
 extern int mcast_set_ttl(SOCKET sock, int ttl);
 extern int mcast_leave(SOCKET sock, char *grpaddr, char *ifaddr);
 extern int mcast_join(SOCKET sock, char *grpaddr, char *ifaddr);
+extern int mcast_set_loopback(SOCKET sock, int enabled);
+extern int doit();//TODO remove this
 
 
 void usage(char *appname)
@@ -376,9 +378,13 @@ void dump_packet(char* buf, int len)
         //will work also for TCP:
         struct udp_hdr *transport = (struct udp_hdr*)(buf + sizeof(struct ip_hdr));
         
+        char src_ip[16] = { 0 };
+        strncat_s(src_ip, sizeof(src_ip), inet_ntoa(src), sizeof(src_ip));
+        char dst_ip[16] = { 0 };
+        strncat_s(dst_ip, sizeof(dst_ip), inet_ntoa(dst), sizeof(dst_ip));
         printf("%s %s:%d -> %s:%d\n",
             ((mask->proto == UDP_PROTO) ? "UDP" : "TCP"),
-            inet_ntoa(src), ntohs(transport->src), inet_ntoa(dst), ntohs(transport->dst));
+            src_ip, ntohs(transport->src), dst_ip, ntohs(transport->dst));
     }
     else
     {
@@ -516,7 +522,7 @@ void pingpong(int argc, char *argv[])
     int port_int = 0; // after conversion
     char buf[4000] = { 0 };
 
-    srand(time(NULL));
+    srand((unsigned int)time(NULL));
 
     // parse inputs from user:
     // format: pingpong: %s 7 <mcast ip> <port> <message> <multicast interface> \n
@@ -642,6 +648,9 @@ void pingpong(int argc, char *argv[])
 int main(int argc, char *argv[])
 {
     sock_init();
+
+    //static const char **input[] = { "7", "239.0.0.12", "23232", "e430", "10.1.1.21" };
+    //pingpong(input, 5);
 
     if (argc > 1)
     {

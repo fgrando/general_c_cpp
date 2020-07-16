@@ -32,7 +32,7 @@ void print_addr(const ipAddr *ip)
 	printf("/%d\n", ip->prefix);
 }
 
-void print_mac(uint8_t *mac, int max)
+void print_mac(const uint8_t *mac, int max)
 {
 	for (int i = 0; i < max; i++)
 	{
@@ -72,7 +72,7 @@ void print_it(const iface *nic)
 	if (nic->gatewayCount)
 	{
 		printf("\ngateways:\n");
-		for (int i = 0; i < nic->gatewayCount; i++)
+        for (unsigned int i = 0; i < nic->gatewayCount; i++)
 		{
 			print_addr(&nic->gateway[i]);
 		}
@@ -81,7 +81,7 @@ void print_it(const iface *nic)
 	if (nic->ipCount)
 	{
 		printf("\nip addresses:\n");
-		for (int i = 0; i < nic->ipCount; i++)
+        for (unsigned int i = 0; i < nic->ipCount; i++)
 		{
 			switch (nic->ip[i].version)
 			{
@@ -101,7 +101,7 @@ void print_it(const iface *nic)
 	if (nic->multicastCount)
 	{
 		printf("\nmulticast addresses:\n");
-		for (int i = 0; i < nic->multicastCount; i++)
+		for (unsigned int i = 0; i < nic->multicastCount; i++)
 		{
 			print_addr(&nic->multicast[i]);
 		}
@@ -376,5 +376,5 @@ int doit()
 		print_it(&ifaceList[k]);
 		printf("\n\n");
 	}
-
+    return 0;
 }
