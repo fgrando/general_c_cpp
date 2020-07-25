@@ -10,9 +10,10 @@
 // socket stuff is platform dependent
 // ifdef will be used to do some compatibilization
 
+#define MAX(x, y) ((x>y) ? x : y)
+
 #ifdef WIN32
 #define WIN32_LEAN_AND_MEAN
-#define MAX(x, y) ((x>y) ? x : y)
 #include <winsock2.h>
 #include <Ws2tcpip.h>
 #include <mstcpip.h>
