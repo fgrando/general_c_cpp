@@ -15,13 +15,13 @@ int timestamp(char *buff, int len, int precise)
 
     if (precise)
 	{
-        ret = _snprintf_s(buff, len, "%04d-%02d-%02d.%02d:%02d:%02d",
+        ret = _snprintf_s(buff, (size_t)len, (size_t)len, "%04d-%02d-%02d.%02d:%02d:%02d",
 			(timeinfo.tm_year + 1900), (timeinfo.tm_mon + 1), timeinfo.tm_mday,
 			timeinfo.tm_hour, timeinfo.tm_min, timeinfo.tm_sec);
 	}
 	else
 	{
-        ret = _snprintf_s(buff, len, "%02d:%02d:%02d",
+        ret = _snprintf_s(buff, (size_t)len, (size_t)len, "%02d:%02d:%02d",
 			timeinfo.tm_hour, timeinfo.tm_min, timeinfo.tm_sec);
 	}
 	return ret;
