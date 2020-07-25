@@ -1,14 +1,26 @@
 #include "server.h"
 
+#include "hexdump.hpp" // cosmetics
+
 #include <sstream>
-#include <iostream>
 #include <chrono>
 #include <thread>
+#include <cstring> // memset
 
-#include "hexdump.hpp"
+// socket stuff is platform dependent
+// ifdef will be used to do some compatibilization
 
-// socket stuff
 #ifdef WIN32
+#define WIN32_LEAN_AND_MEAN
+#define MAX(x, y) ((x>y) ? x : y)
+#include <winsock2.h>
+#include <Ws2tcpip.h>
+#include <mstcpip.h>
+
+// keep the posix call names
+#define close(x) closesocket(x)
+// my MSVC does not recognize constexpr (2013)
+#define constexpr const
 
 #else
 #include <arpa/inet.h>
@@ -21,8 +33,7 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
-#define MAX(x, y) ((x>y) ? x : y)
-#include <cstring>
+
 #endif
 
 
@@ -42,6 +53,12 @@ int Server::Init(std::string ip, int port)
 {
     constexpr int OK = 0;
     constexpr int FAIL = -1;
+
+#ifdef WIN32
+    WSADATA wsa;
+    if (WSAStartup(MAKEWORD(2, 2), &wsa))
+        return FAIL;
+#endif
 
     struct sockaddr_in servaddr;
 
@@ -66,7 +83,7 @@ int Server::Init(std::string ip, int port)
     }
 
     // setup server address
-    bzero(&servaddr, sizeof(servaddr));
+    memset(&servaddr, 0x0, sizeof(servaddr));
     servaddr.sin_family = AF_INET;
     servaddr.sin_addr.s_addr = inet_addr(ip.c_str());//htonl(INADDR_ANY);
     servaddr.sin_port = htons(port);
@@ -122,9 +139,9 @@ void Server::ServerForever()
             int clientSock = accept(m_tcpSock, (struct sockaddr*)&clientAddr, &len);
 
             // since only one client is allowed we will not fork
-            bzero(buffer, sizeof(buffer));
+            memset(buffer, 0x0, sizeof(buffer));
 
-            int bytes = read(clientSock, buffer, sizeof(buffer));
+            int bytes = recv(clientSock, buffer, sizeof(buffer), 0);
 
             out.str("");
             out << "[TCP "
@@ -132,14 +149,14 @@ void Server::ServerForever()
                 << " " << bytes << " bytes]:\n" << hexdump::dump(buffer, bytes);
             Print(out.str().c_str());
 
-            write(clientSock, buffer, bytes);
+            send(clientSock, buffer, bytes, 0);
             close(clientSock);
         }
 
         // if udp socket is readable receive the message.
         if (FD_ISSET(m_udpSock, &readSet)) {
             len = sizeof(clientAddr);
-            bzero(buffer, sizeof(buffer));
+            memset(buffer, 0x0, sizeof(buffer));
 
             int bytes = recvfrom(m_udpSock, buffer, sizeof(buffer), 0, (struct sockaddr*)&clientAddr, &len);
             out.str("");

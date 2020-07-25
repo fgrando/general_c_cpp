@@ -36,3 +36,10 @@ HEADERS += \
 
 FORMS += \
         mainwindow.ui
+
+
+CONFIG += c++11
+QMAKE_CXXFLAGS += -std=c++11
+# for windows
+win32:LIBS += -lws2_32
+

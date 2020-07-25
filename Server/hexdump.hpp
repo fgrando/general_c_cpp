@@ -4,6 +4,10 @@
 #include <sstream>
 #include <string>
 
+#ifdef WIN32
+#define snprintf _snprintf
+#endif
+
 namespace hexdump{
 
 
