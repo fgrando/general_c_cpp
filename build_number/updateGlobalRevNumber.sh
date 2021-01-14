@@ -1,4 +1,4 @@
 #!/bin/bash
 revnumber=$(svnversion ${PWD})
-echo \"$revnumber\" > GlobalRevNumber.txt
+echo \"$revnumber\" > svn-rev-number.txt
 
