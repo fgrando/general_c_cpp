@@ -8,7 +8,7 @@ objects = loader.o kernel.o
 	g++ $(GPPPARAMS) -o $@ -c $<
 
 %o: %.s
-	as $(ASMPARAMS) -o $@ -c $<
+	as $(ASMPARAMS) -o $@ $<
 
 mykernel.bin: linker.ld $(objects)
 	ld $(LDPARAMS) -T $< -o $@ $(objects)
@@ -16,3 +16,5 @@ mykernel.bin: linker.ld $(objects)
 install: mykernel.bin
 	sudo cp $< /boot/mykernel.bin
 
+clean:
+	rm *.o *.bin

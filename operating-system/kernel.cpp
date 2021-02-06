@@ -10,7 +10,7 @@ void printf(const char* str)
 }
 
 
-void kernelMain(void* multiboot_st, unsigned int magicnumber)
+extern "C" void kernelMain(void* multiboot_st, unsigned int magicnumber)
 {
 
     printf("hello from the moon!");

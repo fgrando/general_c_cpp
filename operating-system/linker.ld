@@ -5,7 +5,7 @@ OUTPUT_ARCH(i386:i386)
 
 SECTIONS
 {
-    . = 0X0100000
+    . = 0X0100000;
     .text :
     {
         *(.multiboot)
@@ -23,7 +23,7 @@ SECTIONS
         *(.data)
     }
 
-    .bss
+    .bss :
     {
         *(.bss)
     }
