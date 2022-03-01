@@ -1,0 +1,8 @@
+cmake_minimum_required(VERSION 2.8.9)
+project (build-features)
+add_executable(build-features main.cpp)
+#add_definitions(-DFEATURE_ALPHA -DFEATURE_BETA -DFEATURE_GAMMA -DFEATURE_DELTA)
+add_definitions(-DFEATURE_ALPHA)
+#add_definitions(-DFEATURE_BETA)
+#add_definitions(-DFEATURE_GAMMA)
+add_definitions(-DFEATURE_DELTA)
