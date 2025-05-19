@@ -13,6 +13,7 @@ CFLAGS_DEFAULTS += -ggdb
 
 CFLAGS += $(CFLAGS_DEFAULTS)
 #CFLAGS += -fprofile-arcs -ftest-coverage -O0
+#CFLAGS += -fsanitize=address
 
 LFLAGS +=
 
@@ -35,6 +36,7 @@ $(info $$OBJS = $(OBJS))
 $(BUILD_DIR)/%.o: %.c
 	$(Q)echo 'cc: $<'
 	$(Q)mkdir -p $(dir $@)
+	$(Q)clang --analyze "$<"
 	$(Q)$(CC) $(CFLAGS) $(INCLUDE_FLAGS) -c "$<" -o "$@" $(LFLAGS)
 
 $(TARGET_EXEC): $(OBJS)

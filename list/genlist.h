@@ -19,8 +19,8 @@
 
 #define GENLIST_DECLARE_SOURCE(TYPE, NAME)    \
     GENLIST_DECLARE_ADD_API(TYPE, NAME)       \
-    GENLIST_DECLARE_REMOVE_API(TYPE, NAME)    \
     GENLIST_DECLARE_REMOVE_AT_API(TYPE, NAME) \
+    GENLIST_DECLARE_REMOVE_API(TYPE, NAME) \
     GENLIST_DECLARE_PRINT_ALL_API(TYPE, NAME) \
     GENLIST_DECLARE_COUNT_API(TYPE, NAME)     \
     GENLIST_DECLARE_FREE_ALL_API(TYPE, NAME)
@@ -50,6 +50,8 @@
 #define GENLIST_DECLARE_REMOVE_API(TYPE, NAME)                              \
     NAME##_genlist_t *NAME##_remove(NAME##_genlist_t *head, TYPE *elem)     \
     {                                                                       \
+        if (elem == NULL)                                                   \
+            return head;                                                    \
         if (head == NULL)                                                   \
             return NULL;                                                    \
         NAME##_genlist_t *current = head;                                   \
