@@ -4,20 +4,20 @@ def expand_structs(struct_decl):
     # remove comments and special features
     text = re.sub(r'//.*|/\*.*?\*/', '', text, flags=re.DOTALL)
     text = re.sub(r'#.*', '', text)
-    
+
     # remove GCC __attribute__ macros
     text = re.sub(r'__attribute__\([^)]+\)\)', '', text)  # remove leading digits
-    
+
 
 def get_c_structs(c_code, debug=False):
-    
+
     def show(msg):
         if debug:
             print(msg)
 
     structs = []
     text = c_code
-    
+
     show([text])
 
     beginning_struct = re.compile('typedef\s+struct[^\{]+\{|struct[^\{]+\{')
@@ -44,7 +44,7 @@ def get_c_structs(c_code, debug=False):
             show(f"search semicolon at: {idx} {text[idx]}")
             idx += 1
         end = idx +1 # to include the semicolon
-        
+
         show(f"block struct.: {[text[start:end]]}")
         block = text[start:end]
 
