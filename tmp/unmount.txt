@@ -1,0 +1,15 @@
+environment { PROJ_DRIVE = '' }   // or set via script
+// ...
+script { env.PROJ_DRIVE = mountFolder(folder: '...', drives: ['X','Y','Z']) }
+// ...
+post {
+    always {
+        script {
+            if (env.PROJ_DRIVE?.trim()) {
+                bat "subst ${env.PROJ_DRIVE} /d 2>nul || exit /b 0"
+            }
+        }
+    }
+}
+
+The 2>nul || exit /b 0 guard matters: verified — subst X: /d on a letter that isn't substituted returns a non-zero errorlevel, which would otherwise flip your post block red.

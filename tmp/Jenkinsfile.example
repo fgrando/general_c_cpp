@@ -1,0 +1,49 @@
+// Example pipeline consuming the mountFolder step.
+// Assumes the shared library is configured (Manage Jenkins > Global Pipeline
+// Libraries) and imported, e.g. with @Library('my-shared-lib') _ at the top.
+
+@Library('my-shared-lib') _
+
+pipeline {
+    agent { label 'windows' }
+
+    stages {
+        stage('Mount') {
+            steps {
+                script {
+                    try {
+                        // Returns the chosen drive, e.g. "X:"
+                        env.PROJ_DRIVE = mountFolder(
+                            folder: 'C:\\Users\\fgrando\\projects',
+                            drives: ['X', 'Y', 'Z'],
+                            reuseExisting: true   // idempotent across reruns
+                        )
+                        echo "Working on ${env.PROJ_DRIVE}"
+                    } catch (err) {
+                        // Distinguish the failure reason by message if needed.
+                        echo "Mount failed: ${err.getMessage()}"
+                        throw err   // re-throw to fail the stage
+                    }
+                }
+            }
+        }
+
+        stage('Build') {
+            steps {
+                // Use the mounted drive like any other path.
+                bat "\"${env.PROJ_DRIVE}\\build.bat\""
+            }
+        }
+    }
+
+    post {
+        always {
+            // Clean up the substitution if we created it.
+            script {
+                if (env.PROJ_DRIVE) {
+                    bat "subst ${env.PROJ_DRIVE} /d || exit /b 0"
+                }
+            }
+        }
+    }
+}
