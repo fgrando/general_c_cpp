@@ -1,0 +1,22 @@
+{
+  "schema_version": 2,
+  "load_package_md5": "e529aa10d5c026f71ceb128a59b204b2",
+  "jenkins_build_url": "https://jenkins.example/job/app-fw/512/artifact/build/load_package.bin",
+  "svn_url": "svn://scm.example/aero/branches/hotfix-1.4.1",
+  "svn_revision": "r18423",
+  "notes": "io timing fix for adc sampling",
+  "components": [
+    {
+      "component": "bootloader",
+      "crc32": "0xc21131a4"
+    },
+    {
+      "component": "application",
+      "crc32": "0x0932a824"
+    },
+    {
+      "component": "ioconfig",
+      "crc32": "0xaaf7f926"
+    }
+  ]
+}

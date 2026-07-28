@@ -1,0 +1,22 @@
+{
+  "schema_version": 2,
+  "load_package_md5": "9f448fa902974dadb0fc7e284484b7c9",
+  "jenkins_build_url": "https://jenkins.example/job/app-fw/519/artifact/build/load_package.bin",
+  "svn_url": "svn://scm.example/aero/trunk",
+  "svn_revision": "r18540",
+  "notes": "io timing fix follow-up",
+  "components": [
+    {
+      "component": "bootloader",
+      "crc32": "0xbb4f92e3"
+    },
+    {
+      "component": "application",
+      "crc32": "0x475490ed"
+    },
+    {
+      "component": "ioconfig",
+      "crc32": "0x59ee91eb"
+    }
+  ]
+}

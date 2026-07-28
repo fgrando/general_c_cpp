@@ -1,0 +1,22 @@
+{
+  "schema_version": 2,
+  "load_package_md5": "1e7aa5b3ea5330ea949061b5ae7d04f5",
+  "jenkins_build_url": "https://jenkins.example/job/app-fw/530/artifact/build/load_package.bin",
+  "svn_url": "svn://scm.example/aero/trunk",
+  "svn_revision": "r18690",
+  "notes": "new telemetry feature",
+  "components": [
+    {
+      "component": "bootloader",
+      "crc32": "0xa0610d85"
+    },
+    {
+      "component": "application",
+      "crc32": "0x9bbf93df"
+    },
+    {
+      "component": "ioconfig",
+      "crc32": "0x20aaf5e3"
+    }
+  ]
+}
