@@ -1,0 +1,16 @@
+In file included from src/foo.c:1:
+include/bad.h: In function 'unused_in_header':
+include/bad.h:1:41: warning: unused variable 'x' [-Wunused-variable]
+    1 | static int unused_in_header(void) { int x; return 0; }   /* -Wunused-variable */
+      |                                         ^
+src/foo.c: In function 'main':
+src/foo.c:4:11: warning: comparison of integer expressions of different signedness: 'unsigned int' and 'int' [-Wsign-compare]
+    4 |     if (u > -1) return 0;          /* -Wsign-compare */
+      |           ^
+src/foo.c:5:12: warning: implicit declaration of function 'undeclared_func' [-Wimplicit-function-declaration]
+    5 |     return undeclared_func();       /* -Wimplicit-function-declaration */
+      |            ^~~~~~~~~~~~~~~
+include/bad.h: At top level:
+include/bad.h:1:12: warning: 'unused_in_header' defined but not used [-Wunused-function]
+    1 | static int unused_in_header(void) { int x; return 0; }   /* -Wunused-variable */
+      |            ^~~~~~~~~~~~~~~~

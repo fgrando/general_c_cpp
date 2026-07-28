@@ -1,0 +1,1 @@
+static int unused_in_header(void) { int x; return 0; }   /* -Wunused-variable */

@@ -1,0 +1,8 @@
+In file included from src/foo.c:1:
+include/bad.h:1:41: warning: unused variable 'x' [-Wunused-variable]
+    1 | static int unused_in_header(void) { int x; return 0; }   /* -Wunused-variable */
+      |                                         ^
+src/foo.c:5:12: error: call to undeclared function 'undeclared_func'; ISO C99 and later do not support implicit function declarations [-Wimplicit-function-declaration]
+    5 |     return undeclared_func();       /* -Wimplicit-function-declaration */
+      |            ^
+1 warning and 1 error generated.
