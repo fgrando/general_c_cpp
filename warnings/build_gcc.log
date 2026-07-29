@@ -1,0 +1,87 @@
+gcc -I include -Wall -Wextra -O1 -fdiagnostics-color=never -Wno-error=implicit-function-declaration -Wno-error=implicit-int -Wno-error=int-conversion -c src\file01.c -o file01.o
+src\file01.c: In function 'f01':
+src\file01.c:5:9: warning: variable 'set_b' set but not used [-Wunused-but-set-variable]
+    5 |     int set_b = 3;         /* -Wunused-but-set-variable */
+      |         ^~~~~
+src\file01.c:4:9: warning: unused variable 'unused_a' [-Wunused-variable]
+    4 |     int unused_a;          /* -Wunused-variable */
+      |         ^~~~~~~~
+In file included from src\file01.c:1:
+include/common.h: At top level:
+include/common.h:5:12: warning: 'helper_unused' defined but not used [-Wunused-function]
+    5 | static int helper_unused(void)
+      |            ^~~~~~~~~~~~~
+gcc -I include -Wall -Wextra -O1 -fdiagnostics-color=never -Wno-error=implicit-function-declaration -Wno-error=implicit-int -Wno-error=int-conversion -c src\file02.c -o file02.o
+src\file02.c: In function 'f02':
+src\file02.c:6:19: warning: comparison of integer expressions of different signedness: 'int' and 'unsigned int' [-Wsign-compare]
+    6 |     for (i = 0; i < n; i++) {   /* -Wsign-compare */
+      |                   ^
+src\file02.c:9:11: warning: comparison of unsigned expression in '>= 0' is always true [-Wtype-limits]
+    9 |     if (n >= 0) {               /* -Wtype-limits: unsigned >= 0 always true */
+      |           ^~
+In file included from src\file02.c:1:
+include/common.h: At top level:
+include/common.h:5:12: warning: 'helper_unused' defined but not used [-Wunused-function]
+    5 | static int helper_unused(void)
+      |            ^~~~~~~~~~~~~
+gcc -I include -Wall -Wextra -O1 -fdiagnostics-color=never -Wno-error=implicit-function-declaration -Wno-error=implicit-int -Wno-error=int-conversion -c src\file03.c -o file03.o
+src\file03.c: In function 'f03':
+src\file03.c:3:12: warning: implicit declaration of function 'do_thing' [-Wimplicit-function-declaration]
+    3 |     return do_thing(5);    /* -Wimplicit-function-declaration */
+      |            ^~~~~~~~
+gcc -I include -Wall -Wextra -O1 -fdiagnostics-color=never -Wno-error=implicit-function-declaration -Wno-error=implicit-int -Wno-error=int-conversion -c src\file04.c -o file04.o
+src\file04.c:2:12: warning: 'never_called' defined but not used [-Wunused-function]
+    2 | static int never_called(void)    { return 0; }   /* -Wunused-function */
+      |            ^~~~~~~~~~~~
+gcc -I include -Wall -Wextra -O1 -fdiagnostics-color=never -Wno-error=implicit-function-declaration -Wno-error=implicit-int -Wno-error=int-conversion -c src\file05.c -o file05.o
+src\file05.c: In function 'f05':
+src\file05.c:1:23: warning: unused parameter 'ignored' [-Wunused-parameter]
+    1 | int f05(int used, int ignored)   /* -Wunused-parameter: ignored */
+      |                   ~~~~^~~~~~~
+gcc -I include -Wall -Wextra -O1 -fdiagnostics-color=never -Wno-error=implicit-function-declaration -Wno-error=implicit-int -Wno-error=int-conversion -c src\file06.c -o file06.o
+src\file06.c: In function 'f06':
+src\file06.c:7:1: warning: control reaches end of non-void function [-Wreturn-type]
+    7 | }
+      | ^
+gcc -I include -Wall -Wextra -O1 -fdiagnostics-color=never -Wno-error=implicit-function-declaration -Wno-error=implicit-int -Wno-error=int-conversion -c src\file07.c -o file07.o
+gcc -I include -Wall -Wextra -O1 -fdiagnostics-color=never -Wno-error=implicit-function-declaration -Wno-error=implicit-int -Wno-error=int-conversion -c src\file08.c -o file08.o
+src\file08.c: In function 'f08':
+src\file08.c:4:14: warning: format '%d' expects argument of type 'int', but argument 2 has type 'char *' [-Wformat=]
+    4 |     printf("%d\n", "not an int");   /* -Wformat */
+      |             ~^     ~~~~~~~~~~~~
+      |              |     |
+      |              int   char *
+      |             %s
+src\file08.c:4:14: warning: format '%d' expects argument of type 'int', but argument 2 has type 'char *' [-Wformat=]
+    4 |     printf("%d\n", "not an int");   /* -Wformat */
+      |             ~^     ~~~~~~~~~~~~
+      |              |     |
+      |              int   char *
+      |             %s
+gcc -I include -Wall -Wextra -O1 -fdiagnostics-color=never -Wno-error=implicit-function-declaration -Wno-error=implicit-int -Wno-error=int-conversion -c src\file09.c -o file09.o
+src\file09.c: In function 'f09':
+src\file09.c:3:9: warning: suggest parentheses around assignment used as truth value [-Wparentheses]
+    3 |     if (a = b) {           /* -Wparentheses */
+      |         ^
+gcc -I include -Wall -Wextra -O1 -fdiagnostics-color=never -Wno-error=implicit-function-declaration -Wno-error=implicit-int -Wno-error=int-conversion -c src\file10.c -o file10.o
+src\file10.c: In function 'f10':
+src\file10.c:3:15: warning: suggest braces around empty body in an 'if' statement [-Wempty-body]
+    3 |     if (x > 0);            /* -Wempty-body */
+      |               ^
+gcc -I include -Wall -Wextra -O1 -fdiagnostics-color=never -Wno-error=implicit-function-declaration -Wno-error=implicit-int -Wno-error=int-conversion -c src\foo.c -o foo.o
+In file included from src\foo.c:1:
+include/bad.h: In function 'unused_in_header':
+include/bad.h:1:41: warning: unused variable 'x' [-Wunused-variable]
+    1 | static int unused_in_header(void) { int x; return 0; }   /* -Wunused-variable */
+      |                                         ^
+src\foo.c: In function 'main':
+src\foo.c:4:11: warning: comparison of integer expressions of different signedness: 'unsigned int' and 'int' [-Wsign-compare]
+    4 |     if (u > -1) return 0;          /* -Wsign-compare */
+      |           ^
+src\foo.c:5:12: warning: implicit declaration of function 'undeclared_func' [-Wimplicit-function-declaration]
+    5 |     return undeclared_func();       /* -Wimplicit-function-declaration */
+      |            ^~~~~~~~~~~~~~~
+include/bad.h: At top level:
+include/bad.h:1:12: warning: 'unused_in_header' defined but not used [-Wunused-function]
+    1 | static int unused_in_header(void) { int x; return 0; }   /* -Wunused-variable */
+      |            ^~~~~~~~~~~~~~~~
