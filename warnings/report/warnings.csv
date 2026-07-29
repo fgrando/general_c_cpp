@@ -1,0 +1,10 @@
+built_file,offender_file,offender_line,warning_type,count
+src/file01.c,src/file01.c,4,-Wunused-variable,1
+src/file01.c,src/file01.c,5,-Wunused-but-set-variable,1
+src/file02.c,src/file02.c,6,-Wsign-compare,1
+src/file02.c,src/file02.c,9,-Wtype-limits,1
+src/file04.c,src/file04.c,2,-Wunused-function,1
+src/file06.c,src/file06.c,7,-Wreturn-type,1
+src/file08.c,src/file08.c,4,-Wformat=,1
+src/file09.c,src/file09.c,3,-Wparentheses,1
+src/file10.c,src/file10.c,3,-Wempty-body,1

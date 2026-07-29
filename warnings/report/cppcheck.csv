@@ -1,0 +1,5 @@
+metric,value,other
+errors,2,100
+warnings,5,200
+style,13,300
+performance,1,400
