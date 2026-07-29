@@ -1,0 +1,16 @@
+# waivers.csv  -- columns: file,line,warning
+# Rules:
+#   * line blank or '*'    = any line (best for third-party code that drifts)
+#   * warning blank or '*' = any warning type for that file[:line]
+#   * file is matched as a path suffix, so 'common.h' matches 'include/common.h'
+#   * '#' comments and blank lines are ignored; a 'file,line,warning' header is skipped
+
+# 1) Third-party-ish shared header we do NOT control: ignore its unused-function
+#    on ANY line (wildcard line survives upstream edits).
+include/common.h,*,-Wunused-function
+
+# 2) A known, accepted warning pinned to an exact file+line+type.
+src/file05.c,1,-Wunused-parameter
+
+# 3) Waive every warning in one file regardless of type (e.g. generated code).
+src/file03.c,*,*
