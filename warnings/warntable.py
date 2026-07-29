@@ -13,6 +13,8 @@ Columns:
   offender_line  the line number in the offender file.
   warning_type   the -Wflag (e.g. -Wunused-variable); '(no-flag)' if none.
   count          how many such warnings (aggregated mode; sum = overall total).
+  sample         the full log line the warning was reported on. In aggregated
+                 mode (count > 1) this is the last matching line seen.
 
 Waivers (--waivers FILE): CSV rows  file,line,warning  matched against
 (offender_file, offender_line, warning_type). A matching warning is dropped.
@@ -127,7 +129,7 @@ def is_waived(offender, line, wtype, waivers):
 
 
 def parse_log(path, waivers=None, count_errors=False):
-    """Yield (built_file, offender_file, offender_line, warning_type) per warning."""
+    """Yield (built_file, offender_file, offender_line, warning_type, sample) per warning."""
     waivers = waivers or []
     tu = None          # translation unit currently being compiled; never cleared
     rows = []
@@ -170,7 +172,7 @@ def parse_log(path, waivers=None, count_errors=False):
                 waived += 1
                 continue
 
-            rows.append((built, offender, oline, wtype))
+            rows.append((built, offender, oline, wtype, line))
 
     return rows, waived
 
@@ -192,13 +194,19 @@ def main(argv=None):
     try:
         w = csv.writer(fh)
         if args.raw:
-            w.writerow(['built_file', 'offender_file', 'offender_line', 'warning_type'])
+            w.writerow(['built_file', 'offender_file', 'offender_line', 'warning_type', 'sample'])
             for r in rows:
                 w.writerow(r)
         else:
-            w.writerow(['built_file', 'offender_file', 'offender_line', 'warning_type', 'count'])
-            for (built, off, oln, wt), n in sorted(Counter(rows).items()):
-                w.writerow([built, off, oln, wt, n])
+            w.writerow(['built_file', 'offender_file', 'offender_line', 'warning_type', 'count', 'sample'])
+            counts = Counter()
+            last_sample = {}
+            for built, off, oln, wt, sample in rows:
+                key = (built, off, oln, wt)
+                counts[key] += 1
+                last_sample[key] = sample     # last occurrence wins
+            for (built, off, oln, wt), n in sorted(counts.items()):
+                w.writerow([built, off, oln, wt, n, last_sample[(built, off, oln, wt)]])
     finally:
         if fh is not sys.stdout:
             fh.close()
