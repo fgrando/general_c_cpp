@@ -1,0 +1,15 @@
+[buildA] MAKEFLAGS=[ --no-print-directory]
+[buildA] start 23:19:55  (will sleep 5s)
+VAR1 is MYVAR1
+WINDIR is C:\WINDOWS
+[buildA] end   23:20:01
+[buildB] MAKEFLAGS=[ --no-print-directory]
+[buildB] start 23:20:01  (will sleep 10s)
+VAR1 is MYVAR1
+WINDIR is C:\WINDOWS
+[buildB] end   23:20:11
+[buildC] MAKEFLAGS=[ --no-print-directory]
+[buildC] start 23:20:12  (will sleep 15s)
+VAR1 is MYVAR1
+WINDIR is C:\WINDOWS
+[buildC] end   23:20:27

@@ -1,0 +1,44 @@
+// Requires an agent with GNU make and a POSIX shell (bash) on PATH,
+// matching what this Makefile tree already assumes locally.
+def BUILDS = ['buildA', 'buildB', 'buildC']
+
+pipeline {
+    agent any
+
+    options {
+        timestamps()
+    }
+
+    stages {
+        stage('Build') {
+            steps {
+                script {
+                    parallel(BUILDS.collectEntries { dir ->
+                        [(dir): {
+                            stage(dir) {
+                                // Reuses the top-level Makefile's own per-target
+                                // rule (make <dir>), which already tees output
+                                // into <dir>.log via `set -o pipefail`.
+                                sh "make ${dir}"
+                            }
+                        }]
+                    })
+                }
+            }
+        }
+
+        stage('Combine logs') {
+            steps {
+                // Delegates to the Makefile's own consolidate-logs target so
+                // the concatenation order/logic lives in one place.
+                sh "make consolidate-logs"
+            }
+        }
+    }
+
+    post {
+        always {
+            archiveArtifacts artifacts: '*.log', allowEmptyArchive: true
+        }
+    }
+}
