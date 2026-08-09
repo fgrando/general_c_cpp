@@ -1,23 +1,13 @@
 BUILDS := buildA buildB buildC
 
-# On this system make reports its own path in Windows-native form
-# (C:/...), which the MSYS shell can't resolve; force PATH lookup instead.
-MAKE := make
-SHELL := /bin/bash
-export VAR1 := MYVAR1
+.PHONY: all buildAPI $(BUILDS)
 
-.PHONY: all consolidate-logs $(BUILDS)
-all:
-	@start=$$(date +%s); \
-	$(MAKE) --no-print-directory $(BUILDS); \
-	$(MAKE) --no-print-directory consolidate-logs; \
-	end=$$(date +%s); \
-	echo "Total time: $$((end - start))s"
+all: $(BUILDS)
 
-consolidate-logs:
-	cat $(addsuffix .log,$(BUILDS)) > build.log
+# buildAPI must complete before ANY of the parallel builds start.
+# Declaring it as a prerequisite of each build (no recipe here) creates
+# the edge; the recipe below is shared by all four targets.
+$(BUILDS): buildAPI
 
-$(BUILDS):
-	set -o pipefail; $(MAKE) -C $@ -j1 all | tee $@.log 2>&1;
-#	set -o pipefail; $(MAKE) -C $@    all | tee $@.log 2>&1;
-
+buildAPI $(BUILDS):
+	$(MAKE) -C $@ -j1 all
