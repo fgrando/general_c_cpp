@@ -1,0 +1,14 @@
+stage('Checkout') {
+    steps {
+        checkout scm        // reuses the job's own SCM config — the same one that fetched this Jenkinsfile
+    }
+}
+
+
+checkout([$class: 'SubversionSCM',
+    locations: [[ remote: 'https://svn.host.internal/repo/trunk',
+                  local: 'wc',                 // match the worker's layout
+                  depthOption: 'infinity',
+                  ignoreExternalsOption: false ]],
+    workspaceUpdater: [$class: 'UpdateUpdater']])
+// ...
