@@ -1,3 +1,6 @@
+use $$var to not resolve it
+	$(Q)svn checkout "$(SVN_URL)" "$(SVN_WC)" \
+	    --username "$$SVN_USER" --password "$$SVN_PASS" $(SVN_COMMON)
 
     stage('Checkout') { steps { checkout scm } }
 
