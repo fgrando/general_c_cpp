@@ -1,3 +1,13 @@
+
+    stage('Checkout') { steps { checkout scm } }
+
+
+
+maybe ci.load
+      ci.save
+
+
+
 /*
  * ============================================================================
  *  CROSS-RUN STATE (archive-based) + SVN CHANGELIST FORMATTER — reference
