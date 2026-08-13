@@ -1,3 +1,13 @@
+logdir
+# option: give each target its own log without repeating tee everywhere
+LOGDIR ?= logs
+checkout:
+	$(Q)mkdir -p $(LOGDIR)
+	$(Q)svn checkout "$(SVN_URL)" "$(SVN_WC)" \
+	    --username "$$SVN_USER" --password "$$SVN_PASS" $(SVN_COMMON) \
+	    2>&1 | tee $(LOGDIR)/checkout.log
+
+
 use $$var to not resolve it
 	$(Q)svn checkout "$(SVN_URL)" "$(SVN_WC)" \
 	    --username "$$SVN_USER" --password "$$SVN_PASS" $(SVN_COMMON)
