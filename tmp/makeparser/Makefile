@@ -16,6 +16,10 @@ FORCE ?= 0
 SVN_URL ?=
 SVN_USER ?=
 
+PACK_DIR ?= pack
+PACK_PATHS ?=
+PACK_TAR ?= pack.tar
+
 .PHONY: all
 all: export-deps
 
@@ -70,7 +74,65 @@ svn-login:
 		svn info "$$repo_url"; \
 	fi
 
+# Maps MAP_PATH to the first available drive letter in MAP_DRIVES (a
+# comma-separated list, e.g. F,G,H,I) using `subst`. A drive is considered
+# available if it isn't currently in use (subst'd, mapped, or a real drive).
+# Checked against `subst`'s own listing rather than just `-d X:/`, since a
+# drive substed to a since-deleted folder still fails re-subst ("Drive
+# already SUBSTed") even though `-d` would wrongly call it free.
+.PHONY: mapdrive
+mapdrive:
+	@test -n "$(MAP_PATH)" || { echo "MAP_PATH is required, e.g. MAP_PATH='C:\\the path\\workdir'" >&2; exit 1; }; \
+	test -n "$(MAP_DRIVES)" || { echo "MAP_DRIVES is required, e.g. MAP_DRIVES=F,G,H,I" >&2; exit 1; }; \
+	drive=""; \
+	drives="$(MAP_DRIVES)"; \
+	substed="$$(subst)"; \
+	IFS=','; \
+	for d in $$drives; do \
+		d=$$(printf '%s' "$$d" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$$//' -e 's/://'); \
+		[ -n "$$d" ] || continue; \
+		if ! printf '%s\n' "$$substed" | grep -qi "^$${d}:" && [ ! -d "$${d}:/" ]; then \
+			drive=$$d; \
+			break; \
+		fi; \
+	done; \
+	unset IFS; \
+	if [ -z "$$drive" ]; then \
+		echo "No available drive letter among: $(MAP_DRIVES)" >&2; \
+		exit 1; \
+	fi; \
+	echo "Mapping '$(MAP_PATH)' -> $${drive}:"; \
+	subst "$${drive}:" "$(MAP_PATH)" || exit 1
+
+# Copies each path in PACK_PATHS (a comma-separated list) into a fresh
+# PACK_DIR, then tars up PACK_DIR into PACK_TAR.
+.PHONY: pack
+pack:
+	@test -n "$(PACK_PATHS)" || { echo "PACK_PATHS is required, e.g. PACK_PATHS=\"C:\\a\\path,C:\\b\\path\"" >&2; exit 1; }; \
+	case "$(PACK_DIR)" in \
+		""|"."|".."|"/") echo "Refusing to use PACK_DIR='$(PACK_DIR)'" >&2; exit 1 ;; \
+	esac; \
+	rm -rf "$(PACK_DIR)" && mkdir -p "$(PACK_DIR)" || exit 1; \
+	paths="$(PACK_PATHS)"; \
+	IFS=','; \
+	for p in $$paths; do \
+		p=$$(printf '%s' "$$p" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$$//'); \
+		[ -n "$$p" ] || continue; \
+		if [ ! -e "$$p" ]; then \
+			echo "Path not found: $$p" >&2; \
+			exit 1; \
+		fi; \
+		echo "[pack] copying $$p -> $(PACK_DIR)/"; \
+		cp -r "$$p" "$(PACK_DIR)/" || exit 1; \
+	done; \
+	unset IFS; \
+	echo "[pack] creating $(PACK_TAR)"; \
+	tar -cf "$(PACK_TAR)" -C "$(PACK_DIR)" . || exit 1; \
+	echo "[pack] done: $(PACK_TAR)"
+
 .PHONY: help
 help:
 	@echo "Usage: make DEPS_FILE=path/to/deps.txt [FORCE=1]"
 	@echo "       make svn-login [DEPS_FILE=path/to/deps.txt] [SVN_URL=url] [SVN_USER=user]"
+	@echo "       make mapdrive MAP_PATH='C:\\the path\\workdir' MAP_DRIVES=F,G,H,I"
+	@echo "       make pack PACK_PATHS='C:\\a\\path,C:\\b\\path' [PACK_DIR=pack] [PACK_TAR=pack.tar]"
