@@ -1,0 +1,2 @@
+   calc	http://example.com/svn/calc	5	  out/calc  
+clock    http://example.com/svn/clock     6      out/clock

@@ -1,0 +1,5 @@
+# last updated: 10.11.2021
+
+calc  http://192.168.1.228/svn/myapp/trunk/calc  1234 calculator/version1
+clock http://192.168.1.228/svn/myapp/trunk/clock 1000 clock
+editor http://192.168.1.228/svn/editor/tag/v1.0  2001 tools/editor.exe

@@ -1,0 +1,8 @@
+# header
+
+
+calc http://example.com/svn/calc 1 out/calc
+   
+	
+clock http://example.com/svn/clock 2 out/clock
+
