@@ -255,7 +255,8 @@ it at `init`, so changes need a restart — except `filewatch`, which has a
 
 [filewatch]
 enabled=1
-path=C:\temp\*.trigger      ; wildcards allowed
+path=C:\temp\*.trigger      ; wildcards allowed in any component
+max_depth=4                 ; how many folder levels a `**` may descend
 interval=2                  ; seconds between polls
 message=Trigger file detected
 banner_on_free=0            ; 1 = also show a green banner when absent
@@ -273,3 +274,48 @@ force=0                     ; 0 = apps may prompt and cancel the logoff
 TeraTerm=C:\Program Files (x86)\teraterm\ttermpro.exe|/C=3 /BAUD=115200
 Temp folder=C:\temp
 ```
+
+### `filewatch` path patterns
+
+Wildcards work in **any** component of `path`, not just the file name:
+
+| Pattern | Matches |
+| --- | --- |
+| `C:\temp\*.trigger` | one fixed folder |
+| `C:\logs\run_*\*.trigger` | `*` and `?` within a single folder level |
+| `C:\Users\me\**\*.trigger` | that folder and its subtree, `max_depth` levels down |
+
+Spaces need no quoting — `path=C:\My Folder\**\a file.trigger` works as
+written, and a wildcard may span a spaced folder name (`My *\sub dir\*.t`).
+Quotes around the whole value are tolerated and stripped, and whitespace
+around it is trimmed. Forward slashes are accepted and folded to
+backslashes. Folder names match case-insensitively; the file name component is still matched by
+`FindFirstFileA`, so existing configs behave exactly as before. A directory
+never counts as a match, junctions and symlinks are not followed, and the
+**shallowest** match wins — a file dropped right under the root is found
+without first descending into some unrelated deep subtree.
+
+`max_depth` is the knob that matters. Each level multiplies the work, and
+the usual case — no signal file — always pays for the whole walk. Measured
+on one real user profile with `path=C:\Users\me\**\*.trigger`:
+
+| `max_depth` | folders visited per fruitless scan | time |
+| --- | --- | --- |
+| 2 | 230 | 30 ms |
+| 4 (default) | 2 600 | 0.4 s |
+| 6 | 17 600 | 2.5 s |
+| 8 | 62 000 | 17 s |
+
+Whatever creates the signal file should write its detail line and then
+rename the file into place. A scan that catches the file after `CreateFile`
+but before the write shows an empty detail — it fixes itself on the next
+poll, since the first line is re-read every scan, but a rename avoids the
+flicker entirely.
+
+So root the pattern as close to the target as you can, and raise `interval`
+if you need a deep `**`. A file deeper than `max_depth` is simply not seen.
+The scan itself runs on a worker thread, so a slow pattern never freezes
+the tray — the only cost is up to a second of extra detection latency, plus
+the disk traffic. If a scan is broad enough to hit the 200 000-folder
+runaway guard it gives up and says so in the menu instead of reporting
+"not present".
